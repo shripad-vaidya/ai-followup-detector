@@ -1,0 +1,21 @@
+
+---
+
+# 13. Add LICENSE
+
+Since you want this to be free/open source, I'd recommend:
+
+### MIT License
+
+This allows others to use, modify and distribute your package with relatively few restrictions.
+
+You can add the standard MIT license text.
+
+---
+
+# 14. Install development dependencies
+
+Run:
+
+```powershell
+pip install -e ".[dev]"
