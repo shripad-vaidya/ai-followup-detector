@@ -48,6 +48,6 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/YOUR_USERNAME/ai-followup-detector"
-Repository = "https://github.com/YOUR_USERNAME/ai-followup-detector"
-Issues = "https://github.com/YOUR_USERNAME/ai-followup-detector/issues"
+Homepage = "https://github.com/shripad-vaidya/ai-followup-detector"
+Repository = "https://github.com/shripad-vaidya/ai-followup-detector"
+Issues = "https://github.com/shripad-vaidya/ai-followup-detector/issues"
