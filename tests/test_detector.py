@@ -1,7 +1,6 @@
 import pytest
 
-from ai_followup_detector import FollowUpDetector
-
+from ai_followup_detector import FollowUpDetector, FollowUpResult
 
 class FakeLLM:
 
@@ -22,8 +21,10 @@ async def test_follow_up_detection():
         message="What about February?"
     )
 
-    assert result["follow_up"] is True
-    assert result["follow_up_query"] == "Show sales for February"
+    # assert result["follow_up"] is True
+    # assert result["follow_up_query"] == "Show sales for February"
+    assert result.follow_up is True
+    assert result.follow_up_query == "Show sales for February"
     
 @pytest.mark.asyncio
 async def test_empty_history_is_not_follow_up():
@@ -57,8 +58,10 @@ async def test_non_follow_up_detection():
         message="Show me the current inventory"
     )
 
-    assert result["follow_up"] is False
-    assert result["follow_up_query"] == ""
+    # assert result["follow_up"] is False
+    assert result.follow_up is False
+    # assert result["follow_up_query"] == ""
+    assert result.follow_up_query == ""
     
 class InspectableLLM:
 
@@ -130,3 +133,79 @@ async def test_llm_is_called_once():
     )
 
     assert llm.call_count == 1
+
+class ResultObjectLLM:
+
+    async def ainvoke(self, prompt):
+        return FollowUpResult(
+            follow_up=True,
+            follow_up_query="Show sales for February"
+        )
+
+
+class InvalidResponseLLM:
+
+    async def ainvoke(self, prompt):
+        return "invalid response"
+
+
+@pytest.mark.asyncio
+async def test_llm_result_is_follow_up_result():
+
+    detector = FollowUpDetector(ResultObjectLLM())
+
+    result = await detector.detect(
+        history=["Show sales for January"],
+        message="What about February?"
+    )
+
+    assert isinstance(result, FollowUpResult)
+    assert result.follow_up is True
+    assert result.follow_up_query == "Show sales for February"
+
+
+@pytest.mark.asyncio
+async def test_invalid_llm_response_raises_type_error():
+
+    detector = FollowUpDetector(InvalidResponseLLM())
+
+    with pytest.raises(TypeError, match="LLM response must be"):
+        await detector.detect(
+            history=["Show sales for January"],
+            message="What about February?"
+        )
+    
+@pytest.mark.asyncio
+async def test_invalid_history_type_raises_type_error():
+
+    detector = FollowUpDetector(FakeLLM())
+
+    with pytest.raises(TypeError, match="history must be a list of strings"):
+        await detector.detect(
+            history="Show sales for January",
+            message="What about February?"
+        )
+
+
+@pytest.mark.asyncio
+async def test_invalid_history_item_raises_type_error():
+
+    detector = FollowUpDetector(FakeLLM())
+
+    with pytest.raises(TypeError, match="history must be a list of strings"):
+        await detector.detect(
+            history=["Show sales for January", 123],
+            message="What about February?"
+        )
+
+
+@pytest.mark.asyncio
+async def test_invalid_message_type_raises_type_error():
+
+    detector = FollowUpDetector(FakeLLM())
+
+    with pytest.raises(TypeError, match="message must be a string"):
+        await detector.detect(
+            history=["Show sales for January"],
+            message=None
+        )
