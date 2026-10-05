@@ -2,6 +2,7 @@ import pytest
 
 from ai_followup_detector import FollowUpDetector, FollowUpResult
 
+
 class FakeLLM:
 
     async def ainvoke(self, prompt):
